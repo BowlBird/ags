@@ -1,15 +1,15 @@
+# BowlBird's AGS Config
 
-# Starter Config
+This is a completely overengineered pseudo-desktop environment built from [AGS](https://github.com/Aylur/ags). Please feel free to use any code from this repository.
 
-if suggestions don't work, first make sure
-you have TypeScript LSP working in your editor
+## Dependencies
 
-if you do not want typechecking only suggestions
+_that won't be installed through npm i_
 
-```json
-// tsconfig.json
-"checkJs": false
-```
-
-types are symlinked to:
-/usr/share/com.github.Aylur.ags/types
+- aylurs-gtk-shell
+- typescript
+- bun
+- gtk3
+- gtk-session-lock
+- hyprland (for best functionality)
+- ColorThief
