@@ -4,7 +4,7 @@ This is a completely overengineered pseudo-desktop environment built from [AGS](
 
 ## Dependencies
 
-_that won't be installed through npm i_
+_that won't be installed through `npm i`_
 
 - aylurs-gtk-shell
 - typescript
