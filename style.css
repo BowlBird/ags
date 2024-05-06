@@ -1,0 +1,117 @@
+window {
+  background: transparent;
+}
+
+button {
+  border-radius: 16px;
+  background-color: transparent; 
+  box-shadow: none;
+}
+
+
+button:active {
+  background-color: @theme_selected_bg_color;
+}
+
+button:hover {
+  background-color: @theme_titlebar_bg_color;
+}
+
+label {
+  font-weight: bold;
+}
+
+.workspace {
+  border-radius: 16px;
+  /* background-color: @theme_bg_color; */
+  background-color: rgba(25,25,25,.7);
+  margin: 10px 0px 0px 10px;
+}
+
+.workspaces button.focused {
+  color: @theme_fg_color;
+}
+
+/* .clients {
+  margin: 5px;
+  border-radius: 16px;
+  background-color: @theme_bg_color;
+} */
+.clients button.focused {
+  color: @theme_fg_color;
+}
+
+.client-text {
+  margin-left: 5px;
+}
+
+.system {
+  border-radius: 16px;
+  /* background-color: @theme_bg_color; */
+  background-color: rgba(25,25,25,.7);
+  margin: 10px 10px 0px 0px;
+  padding: 0px 8px 0px 8px;
+}
+
+.volume {
+  color: #f38019;
+}
+
+.volume-progress {
+  min-width: 22px;
+  min-height: 22px;
+  font-size: 2px;
+}
+
+.volume-text {
+  color: #f38019;
+  margin-right: 5px;
+}
+
+.battery-indicator {
+  min-width: 22px;
+  min-height: 22px;
+  font-size: 2px;
+  color: #a8b765;
+  /* color: #d3869b; */
+}
+
+.battery-usage-discharging {
+  min-width: 22px;
+  min-height: 22px;
+  font-size: 2px;
+  color: #fb4934
+}
+
+.battery-usage-charging {
+  min-width: 22px;
+  min-height: 22px;
+  font-size: 2px;
+  color: #fabd2f
+}
+
+.battery-usage-stable {
+  min-width: 22px;
+  min-height: 22px;
+  font-size: 2px;
+  color: rgba(0,0,0,0);
+}
+
+.battery-text {
+  margin-right: 5px;
+}
+
+.clock {
+  color: #d3869b;
+}
+
+.clock-text {
+  margin-right: 5px;
+}
+
+.systray {
+  margin: 10px 10px 0px 0px;
+  border-radius: 16px;
+  /* background-color: @theme_bg_color; */
+  background-color: rgba(25,25,25,.7);
+}
