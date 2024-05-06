@@ -139,7 +139,7 @@ export const playerWidget = ({
             blue: background.blue,
             alpha: 0.8,
           }) +
-          css.margin({ left: 0.26, right: 0.26, top: 0.2, bottom: 0.2 }) +
+          css.marginAll({ margin: 0.2 }) +
           css.borderRadius({ radius: height }) +
           css.padding({ left: 1, right: 1, top: 0.1, bottom: 0.1 }) +
           css.minHeight({ height: height })
