@@ -323,7 +323,8 @@ export const entry = async ({
             player: it,
             width: width + 1,
             height: 2.5,
-            maxCharWidth: 20,
+            titleMaxCharWidth: 20,
+            artistMaxCharWidth: 13,
           })
         )
       ),

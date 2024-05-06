@@ -15,12 +15,14 @@ export const playerWidget = ({
   player,
   width,
   height,
-  maxCharWidth,
+  titleMaxCharWidth,
+  artistMaxCharWidth,
 }: {
   player: MprisPlayer;
   width: number;
   height: number;
-  maxCharWidth: number;
+  titleMaxCharWidth: number;
+  artistMaxCharWidth: number;
 }) => {
   const albumImage = player.bind("cover_path");
   const colors = Variable({
@@ -131,42 +133,42 @@ export const playerWidget = ({
       css: Utils.merge(
         [backgroundColor, primaryColor, secondaryColor],
         (background, primary, secondary) =>
-          css.backgroundLinearGradient({
-            degrees: gradientDegrees,
-            transitionPoint: 70,
-            fromRed: background.red,
-            fromGreen: background.green,
-            fromBlue: background.blue,
-            fromAlpha: 0.9,
-            toRed: background.red,
-            toGreen: background.green,
-            toBlue: background.blue,
-            toAlpha: 0,
+          css.backgroundColorRGBA({
+            red: background.red,
+            green: background.green,
+            blue: background.blue,
+            alpha: 0.8,
           }) +
+          css.margin({ left: 0.26, right: 0.26, top: 0.2, bottom: 0.2 }) +
           css.borderRadius({ radius: height }) +
-          css.padding({ left: 1, right: 1, top: 0.25, bottom: 0.25 }) +
+          css.padding({ left: 1, right: 1, top: 0.1, bottom: 0.1 }) +
           css.minHeight({ height: height })
       ),
       children: children,
     });
+
+  const textColor = (color: number) =>
+    Math.min(255, 255 / Math.max(color - 60, 1));
 
   const text = ({
     label,
     hpack,
     visible,
     setup,
+    maxCharWidth,
   }: {
     label?: string | Binding<any, any, string>;
     hpack: "start" | "end";
     visible?: boolean | Binding<any, any, boolean>;
     setup?: (self) => void;
+    maxCharWidth: number;
   }) =>
     Widget.Label({
-      css: backgroundColor.as((color) =>
+      css: primaryColor.as((color) =>
         css.ColorRGBA({
-          red: 255 - color.red,
-          green: 255 - color.green,
-          blue: 255 - color.blue,
+          red: color.red, //textColor(color.red),
+          green: color.green, //textColor(color.green),
+          blue: color.blue, //textColor(color.blue),
           alpha: 1,
         })
       ),
@@ -182,22 +184,21 @@ export const playerWidget = ({
     text({
       hpack: "start",
       label: player.bind("track_title"),
+      maxCharWidth: titleMaxCharWidth,
     });
 
   const artist = () =>
     text({
       hpack: "start",
       label: player.bind("track_artists").as((artists) => artists.join(", ")),
+      maxCharWidth: artistMaxCharWidth,
     });
 
   const progress = () =>
     text({
       hpack: "end",
       visible: player.bind("length").as((length) => length > 0),
-      // label: Utils.merge(
-      //   [player.bind("position"), player.bind("length")],
-      //   (position, length) => `${lengthStr(position)} / ${lengthStr(length)}`
-      // ),
+      maxCharWidth: 20,
       setup: (self) => {
         function update() {
           self.label = `${lengthStr(player.position)} / ${lengthStr(
