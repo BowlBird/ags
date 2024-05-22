@@ -12,11 +12,12 @@ globalThis.lock = {
     lock({
       debugDuration: 5000,
       animationDuration: 1000,
-      staggerDuration: 300,
+      staggerDuration: 400,
       layerName: "lock",
-      background: "/home/carson/Pictures/TreesFinal.png",
+      background: "/home/carson/Pictures/wallpaper.png",
       blur: true,
     }),
   isLocked: false,
   debug: false,
+  onUnlock: () => {},
 };

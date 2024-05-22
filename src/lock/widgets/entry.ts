@@ -1,4 +1,4 @@
-import { css } from "src/css";
+import { css } from "src/services/css";
 
 // definition of entry widget to enter your password and authenticate through
 export const entryWidget = ({

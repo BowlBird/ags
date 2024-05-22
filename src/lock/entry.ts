@@ -1,11 +1,11 @@
 import Gtk from "gi://Gtk?version=3.0";
-import { transition } from "src/functions";
+import { transition } from "src/services/functions";
 import { Binding } from "types/types/service";
 import { weatherFetched, weatherWidget } from "src/widgets/weather";
 import { brightnessWidget } from "src/widgets/brightness";
 import { audioWidget } from "src/widgets/audio";
 import { batteryWidget } from "src/widgets/battery";
-import { css } from "src/css";
+import { css } from "src/services/css";
 import { clock } from "src/widgets/clock";
 import { date } from "src/widgets/date";
 import { entryWidget } from "./widgets/entry";
@@ -252,7 +252,7 @@ export const entry = async ({
       child: await batteryWidget({
         batteryIndicatorStyle:
           iconStyle +
-          css.ColorRGBA({ red: 168, green: 183, blue: 101, alpha: 1 }),
+          css.ColorRGBA({ red: 188, green: 203, blue: 121, alpha: 1 }),
         dischargeIndicatorStyle:
           iconStyle +
           css.ColorRGBA({ red: 251, green: 73, blue: 52, alpha: 1 }),
@@ -260,7 +260,9 @@ export const entry = async ({
           iconStyle +
           css.ColorRGBA({ red: 250, green: 189, blue: 47, alpha: 1 }),
         overlayStyle: "",
-        iconStyle: css.fontSize({ size: 1.5 }),
+        iconStyle:
+          css.fontSize({ size: 2 }) +
+          css.ColorRGBA({ red: 188, green: 203, blue: 121, alpha: 1 }),
         rounded: true,
         startAt: 0.25,
       }),
@@ -285,7 +287,7 @@ export const entry = async ({
           iconStyle +
           css.ColorRGBA({ red: 243, green: 128, blue: 25, alpha: 1 }),
         iconStyle:
-          css.fontSize({ size: 1.5 }) +
+          css.fontSize({ size: 2 }) +
           css.ColorRGBA({ red: 243, green: 128, blue: 25, alpha: 1 }),
         startAt: 0.25,
         rounded: true,

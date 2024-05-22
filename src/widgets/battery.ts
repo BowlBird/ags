@@ -1,4 +1,4 @@
-import { css } from "src/css";
+import { css } from "src/services/css";
 
 // definition of battery widget
 export const batteryWidget = async ({

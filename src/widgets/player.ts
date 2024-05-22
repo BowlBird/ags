@@ -1,4 +1,4 @@
-import { css } from "src/css";
+import { css } from "src/services/css";
 import { colorsFromImage } from "src/services/color";
 import { Binding } from "types/types/service";
 import { MprisPlayer } from "types/types/service/mpris";

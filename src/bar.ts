@@ -1,7 +1,7 @@
 import { System } from "src/bar/system";
 import { SysTray } from "src/bar/tray";
 import { Workspaces } from "src/bar/workspaces";
-import { attachWindow, detachWindow } from "./functions";
+import { attachWindow, detachWindow } from "./services/functions";
 
 const windowName = "bar";
 

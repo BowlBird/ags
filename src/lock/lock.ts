@@ -3,7 +3,11 @@
 import Lock from "gi://GtkSessionLock";
 import Gtk from "gi://Gtk?version=3.0";
 import Gdk from "gi://Gdk?version=3.0";
-import { attachWindow, detachWindow } from "src/functions";
+import {
+  attachWindow,
+  detachWindow,
+  forAllMonitors,
+} from "src/services/functions";
 import { lockScreenBlur, lockScreenImage } from "./background";
 import { entry as entry } from "./entry";
 import Window from "types/types/widgets/window";
@@ -43,6 +47,8 @@ export const lock = async ({
     detachables.forEach((name) => detachWindow({ windowName: name }));
     detachables = [];
     globalThis.lock.isLocked = false;
+    globalThis.lock.onUnlock();
+    globalThis.lock.onUnlock = () => {}; //consume onUnlock function
   };
 
   // for debugging purposes, kill the lock after a given amount of time (in case a problem arises)
@@ -75,13 +81,14 @@ export const lock = async ({
     if (background)
       layers.push(
         lockScreenImage({
-          name: `${layerName}-background`,
+          name: `${layerName}-background-${monitor}`,
           image: background,
           staggerDuration: staggerDuration,
           animationDuration: animationDuration,
         })
       );
-    if (blur) layers.push(lockScreenBlur({ name: `${layerName}-blur` }));
+    if (blur)
+      layers.push(lockScreenBlur({ name: `${layerName}-blur-${monitor}` }));
     layers.forEach((layer) => {
       attachWindow({ window: layer, monitor: monitor });
       layer.show_all();
@@ -89,14 +96,3 @@ export const lock = async ({
     });
   });
 };
-
-function forAllMonitors(func: (monitor: number) => void) {
-  const display = Gdk.Display.get_default();
-  if (!display) {
-    log("couldn't connect to display!");
-    return;
-  }
-  for (let i = 0; i < display.get_n_monitors()!; i++) {
-    func(i);
-  }
-}

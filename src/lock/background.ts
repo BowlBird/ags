@@ -1,4 +1,4 @@
-import { transition } from "src/functions";
+import { transition } from "src/services/functions";
 import { Screen } from "types/types/@girs/gdk-3.0/gdk-3.0.cjs";
 
 // definition of blur layer that sits behind the lock screen

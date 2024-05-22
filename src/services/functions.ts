@@ -1,4 +1,5 @@
 import Gtk from "gi://Gtk?version=3.0";
+import Gdk from "gi://Gdk?version=3.0";
 import Window from "types/types/widgets/window";
 
 var HOME_DIR = Utils.exec('bash -c "echo $HOME"');
@@ -71,8 +72,20 @@ export const attachWindow = ({
  *
  * @param windowName a string representing the name of the window to be detached
  */
-export const detachWindow = ({ windowName }: { windowName: string }) =>
+export const detachWindow = ({ windowName }: { windowName: string }) => {
   App.removeWindow(windowName);
+};
+
+export function forAllMonitors(func: (monitor: number) => void) {
+  const display = Gdk.Display.get_default();
+  if (!display) {
+    log("couldn't connect to display!");
+    return;
+  }
+  for (let i = 0; i < display.get_n_monitors()!; i++) {
+    func(i);
+  }
+}
 
 /**
  * A variable that will transition from a given value to another over duration
