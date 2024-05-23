@@ -12,7 +12,7 @@ globalThis.lock = {
     lock({
       debugDuration: 5000,
       animationDuration: 1000,
-      staggerDuration: 400,
+      staggerDuration: 500,
       layerName: "lock",
       background: "/home/carson/Pictures/wallpaper.png",
       blur: true,

@@ -1,7 +1,5 @@
 import Hyprland from "resource:///com/github/Aylur/ags/service/hyprland.js";
-import Widget, { Label } from "resource:///com/github/Aylur/ags/widget.js";
 import { IconFromClass } from "src/services/functions";
-import * as Utils from "resource:///com/github/Aylur/ags/utils.js";
 
 function Window(client) {
   console.log(`Creating Window: ${client.class}`);

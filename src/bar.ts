@@ -2,34 +2,18 @@ import { System } from "src/bar/system";
 import { SysTray } from "src/bar/tray";
 import { Workspaces } from "src/bar/workspaces";
 import { attachWindow, detachWindow } from "./services/functions";
+import { bar } from "./bar/bar";
 
 const windowName = "bar";
 
-const bar = (monitor = 0) =>
-  Widget.Window({
-    name: windowName,
-    class_name: "bar",
-    monitor,
-    anchor: ["top", "left", "right"],
-    exclusivity: "exclusive",
-    child: Widget.CenterBox({
-      start_widget: Widget.Box({
-        spacing: 0,
-        children: [Workspaces()],
-      }),
-      center_widget: Widget.Box({
-        spacing: 0,
-        children: [],
-      }),
-      end_widget: Widget.Box({
-        hpack: "end",
-        children: [SysTray(), System()],
+globalThis.bar = {
+  start: async (monitor = 0) =>
+    attachWindow({
+      window: await bar({
+        monitor: monitor,
+        windowName: windowName,
+        animationDuration: 1000,
       }),
     }),
-  });
-globalThis.bar = {
-  start: (monitor = 0) => attachWindow(bar(monitor)),
-  stop: () => detachWindow(windowName),
+  stop: () => detachWindow({ windowName: windowName }),
 };
-
-export default {};

@@ -36,8 +36,6 @@ export const lock = async ({
 
   // lock the screen
   const gtkLock = Lock.prepare_lock();
-  gtkLock.lock_lock();
-  globalThis.lock.isLocked = true;
 
   let detachables: any[] = [];
 
@@ -70,6 +68,9 @@ export const lock = async ({
       log("No primary monitor, using monitor 0.");
       return display.get_monitor(0);
     })();
+
+  gtkLock.lock_lock();
+  globalThis.lock.isLocked = true;
 
   // attach lock screen and show
   gtkLock.new_surface(lockUI, lockUIMonitor);

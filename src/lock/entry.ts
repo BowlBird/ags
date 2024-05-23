@@ -6,8 +6,8 @@ import { brightnessWidget } from "src/widgets/brightness";
 import { audioWidget } from "src/widgets/audio";
 import { batteryWidget } from "src/widgets/battery";
 import { css } from "src/services/css";
-import { clock } from "src/widgets/clock";
-import { date } from "src/widgets/date";
+import { clockWidget } from "src/widgets/clock";
+import { dateWidget } from "src/widgets/date";
 import { entryWidget } from "./widgets/entry";
 import * as splash from "src/splash.json";
 import { subheader } from "./widgets/subheader";
@@ -136,7 +136,7 @@ export const entry = async ({
 
   // === HEADER ===
 
-  const _clock = clock({
+  const _clock = clockWidget({
     style: css.fontSize({ size: 4 }) + css.fontWeight({ weight: "bold" }),
   });
 
@@ -152,7 +152,7 @@ export const entry = async ({
     css: subheaderStyle,
     label: "Authentication Failure",
   });
-  const _dateLabel = date({ style: subheaderStyle });
+  const _dateLabel = dateWidget({ style: subheaderStyle });
 
   const splashText = Variable("", {
     poll: [
