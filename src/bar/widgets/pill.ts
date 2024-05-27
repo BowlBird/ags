@@ -24,6 +24,8 @@ export const pillsContainer = ({
   );
 
   return Widget.Box({
+    hpack: "center",
+    vpack: "center",
     css: containerStyle,
     spacing: containerSpacing,
     children: pills,

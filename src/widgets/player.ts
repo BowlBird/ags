@@ -2,13 +2,19 @@ import { css } from "src/services/css";
 import { colorsFromImage } from "src/services/color";
 import { Binding } from "types/types/service";
 import { MprisPlayer } from "types/types/service/mpris";
+import { transitionContainer } from "./transitionContainer";
+import GLib from "gi://GLib";
 
-// lifted from ags's examples.
-function lengthStr(length) {
-  const min = Math.floor(length / 60);
-  const sec = Math.floor(length % 60);
-  const sec0 = sec < 10 ? "0" : "";
-  return `${min}:${sec0}${sec}`;
+interface Color {
+  red: number;
+  green: number;
+  blue: number;
+}
+
+interface Palette {
+  primary: Color;
+  secondary: Color;
+  background: Color;
 }
 
 export const playerWidget = ({
@@ -17,210 +23,238 @@ export const playerWidget = ({
   height,
   titleMaxCharWidth,
   artistMaxCharWidth,
+  animationDuration,
+  playerStyle,
 }: {
   player: MprisPlayer;
   width: number;
   height: number;
   titleMaxCharWidth: number;
   artistMaxCharWidth: number;
+  animationDuration: number;
+  playerStyle: string;
 }) => {
-  const albumImage = player.bind("cover_path");
-  const colors = Variable({
-    background: { red: 0, green: 0, blue: 0 },
-    primary: { red: 0, green: 0, blue: 0 },
-    secondary: { red: 0, green: 0, blue: 0 },
+  const colors = Variable<Palette | undefined>(undefined);
+
+  let cache: {
+    path: string | undefined;
+    title: string | undefined;
+    artists: string[] | undefined;
+  } = {
+    path: undefined,
+    title: undefined,
+    artists: undefined,
+  };
+  Utils.merge([player.bind("cover_path")], (path) => {
+    //cancel previous check
+    colorsFromImage({ path: path })
+      .then((palette) => {
+        if (
+          cache.path !== path ||
+          cache.title !== player.track_title ||
+          cache.artists !== player.track_artists
+        ) {
+          colors.setValue(palette);
+          cache.path = path;
+          cache.title = player.track_title;
+          cache.artists = player.track_artists;
+        }
+      })
+      .catch(() => {
+        log("Invalid path to thumbnail!");
+        colors.setValue(undefined);
+      });
   });
 
-  Utils.merge([albumImage], (image) => {
-    if (image)
-      colorsFromImage({ path: image })
-        .then((palette) => colors.setValue(JSON.parse(palette)))
-        .catch(() => log("Invalid path to thumbnail!"));
-    else log("Could not grab thumbnail for media source.");
-  });
+  const backgroundColor = colors
+    .bind()
+    .as((colors) => colors?.background ?? undefined);
+  const primaryColor = colors
+    .bind()
+    .as((colors) => colors?.primary ?? undefined);
+  const secondaryColor = colors
+    .bind()
+    .as((colors) => colors?.secondary ?? undefined);
 
-  const backgroundColor = colors.bind().as((colors) => colors.background);
-  const primaryColor = colors.bind().as((colors) => colors.primary);
-  const secondaryColor = colors.bind().as((colors) => colors.secondary);
-
-  const coverContainer = ({
-    top,
-    bottom,
-    left,
-    center,
-    right,
+  const blurBox = ({
+    red,
+    green,
+    blue,
   }: {
-    top?: any;
-    bottom?: any;
-    left?: any;
-    center?: any;
-    right?: any;
-  }) =>
-    Widget.Overlay({
-      css: player.bind("cover_path").as(
-        (p) =>
-          (p
-            ? css.backgroundImage({ image: p })
-            : css.backgroundColorRGBA({
-                red: 0,
-                green: 0,
-                blue: 0,
-                alpha: 1,
-              })) +
-          css.minWidth({ width: width }) +
-          css.minHeight({ height: height }) +
-          css.backgroundSize({ size: "cover" }) +
-          css.backgroundPosition({
-            horizontal: "center",
-            vertical: "center",
-          }) +
-          css.borderRadius({ radius: height })
-      ),
-      setup: (self) => {
-        const backgroundCenterBox = Widget.CenterBox({
-          css: player.bind("cover_path").as(
-            (p) =>
-              (p
-                ? css.backgroundImage({ image: p })
-                : css.backgroundColorRGBA({
-                    red: 0,
-                    green: 0,
-                    blue: 0,
-                    alpha: 1,
-                  })) +
-              css.minWidth({ width: width }) +
-              css.backgroundSize({ size: "cover" }) +
-              css.backgroundPosition({
-                horizontal: "center",
-                vertical: "center",
-              }) +
-              css.borderRadius({ radius: height })
-          ),
-        });
-        const overlayCenterBox = Widget.CenterBox({
-          hpack: "center",
-          css: css.minWidth({ width: (width * 8) / 9 }),
-          vertical: true,
-        });
-
-        self.child = backgroundCenterBox;
-        self.overlay = overlayCenterBox;
-        if (top) overlayCenterBox.start_widget = top;
-        if (left) backgroundCenterBox.start_widget = left;
-        if (center) backgroundCenterBox.center_widget = center;
-        if (right) backgroundCenterBox.end_widget = right;
-        if (bottom) overlayCenterBox.end_widget = bottom;
-      },
-    });
-
-  const pillContainer = ({
-    children,
-    hpack,
-    vpack,
-    vertical,
-    gradientDegrees,
-  }: {
-    children: any[];
-    hpack: "start" | "end" | "center";
-    vpack: "start" | "end" | "center";
-    vertical: boolean;
-    gradientDegrees: number;
+    red: number;
+    green: number;
+    blue: number;
   }) =>
     Widget.Box({
-      vertical: vertical,
-      hpack: hpack,
-      vpack: vpack,
-      css: Utils.merge(
-        [backgroundColor, primaryColor, secondaryColor],
-        (background, primary, secondary) =>
+      css:
+        css.margin({ left: 2 }) +
+        css.backgroundLinearGradient({
+          degrees: 84,
+          transitionPoint: 66,
+          fromRed: red,
+          fromGreen: green,
+          fromBlue: blue,
+          fromAlpha: 1,
+          toRed: red,
+          toGreen: green,
+          toBlue: blue,
+          toAlpha: 0,
+        }) +
+        css.borderRadius({ topLeft: height, bottomLeft: height }) +
+        css.minWidth({ width: width / 2 }),
+    });
+
+  const _background = transitionContainer({
+    binding: backgroundColor.as((background) =>
+      Widget.Box({
+        hpack: "center",
+        css:
           css.backgroundColorRGBA({
-            red: background.red,
-            green: background.green,
-            blue: background.blue,
-            alpha: 0.8,
+            red: background?.red ?? 0,
+            green: background?.green ?? 0,
+            blue: background?.blue ?? 0,
+            alpha: 1,
           }) +
-          css.marginAll({ margin: 0.2 }) +
-          css.borderRadius({ radius: height }) +
-          css.padding({ left: 1, right: 1, top: 0.1, bottom: 0.1 }) +
-          css.minHeight({ height: height })
+          css.backgroundImage({ image: player.cover_path }) +
+          css.minWidth({ width: width }) +
+          css.minHeight({ height: height }) +
+          css.backgroundSize({ size: "66%" as any }) +
+          css.backgroundRepeat({ repeat: "no-repeat" }) +
+          css.backgroundPosition({
+            horizontal: "right",
+            vertical: "center",
+          }) +
+          css.borderRadiusAll({ radius: height }),
+        child: blurBox({
+          red: background?.red ?? 0,
+          green: background?.green ?? 0,
+          blue: background?.blue ?? 0,
+        }),
+      })
+    ),
+    transition: "crossfade",
+    transitionDuration: animationDuration,
+  });
+
+  const _labels = Widget.Box({
+    css: css.margin({ left: 1.2 }),
+    vpack: "center",
+    vertical: true,
+    children: [
+      transitionContainer({
+        binding: primaryColor.as((color) =>
+          Widget.Label({
+            css: css.ColorRGBA({
+              red: color?.red ?? 255,
+              green: color?.green ?? 255,
+              blue: color?.blue ?? 255,
+              alpha: 1,
+            }),
+            maxWidthChars: titleMaxCharWidth,
+            truncate: "end",
+            label: player.metadata["xesam:title"],
+          })
+        ),
+        transition: "slide_up",
+        transitionDuration: animationDuration,
+      }),
+      transitionContainer({
+        binding: primaryColor.as((color) =>
+          Widget.Label({
+            css: css.ColorRGBA({
+              red: color?.red ?? 255,
+              green: color?.green ?? 255,
+              blue: color?.blue ?? 255,
+              alpha: 1,
+            }),
+            maxWidthChars: artistMaxCharWidth,
+            truncate: "end",
+            label: (player.metadata["xesam:artist"] ?? [""]).join(" - "),
+          })
+        ),
+        transition: "slide_down",
+        transitionDuration: animationDuration,
+      }),
+    ],
+  });
+
+  return Widget.Overlay({
+    child: Widget.Box({
+      css: playerStyle,
+
+      child: _background,
+    }),
+    overlay: Widget.Box({ css: playerStyle, child: _labels }),
+  });
+};
+
+export const MprisWidget = async ({
+  width,
+  height,
+  titleMaxCharWidth,
+  artistMaxCharWidth,
+  animationDuration,
+  playerDuration,
+  playerTransition,
+  widgetTransition,
+  playerStyle,
+}: {
+  width: number;
+  height: number;
+  titleMaxCharWidth: number;
+  artistMaxCharWidth: number;
+  animationDuration: number;
+  playerDuration: number;
+  playerTransition: string;
+  widgetTransition: string;
+  playerStyle: string;
+}) => {
+  const mprisService = await Service.import("mpris");
+
+  const index = Variable(0, {
+    poll: [playerDuration, (self) => self.getValue() + 1],
+  });
+
+  const currentPlayer = Variable<MprisPlayer | undefined>(undefined);
+
+  let previousAmountOfPlayers = -1;
+  Utils.merge(
+    [mprisService.bind("players"), index.bind()],
+    (players, index) => {
+      if (players.length > 1)
+        currentPlayer.setValue(players[index % players.length]);
+      else if (
+        (currentPlayer.getValue() === undefined ||
+          previousAmountOfPlayers > 1) &&
+        players.length === 1
+      )
+        currentPlayer.setValue(players[0]);
+      else if (players.length === 0) currentPlayer.setValue(undefined);
+      previousAmountOfPlayers = players.length;
+    }
+  );
+
+  const _player = Widget.Revealer({
+    reveal_child: currentPlayer.bind().as((it) => (it ? true : false)),
+    transition: widgetTransition as any,
+    transition_duration: animationDuration * 2,
+    child: transitionContainer({
+      binding: currentPlayer.bind().as((p) =>
+        p
+          ? playerWidget({
+              playerStyle: playerStyle,
+              player: p,
+              width: width,
+              height: height,
+              titleMaxCharWidth: titleMaxCharWidth,
+              artistMaxCharWidth: artistMaxCharWidth,
+              animationDuration: animationDuration,
+            })
+          : Widget.Box()
       ),
-      children: children,
-    });
-
-  const textColor = (color: number) =>
-    Math.min(255, 255 / Math.max(color - 60, 1));
-
-  const text = ({
-    label,
-    hpack,
-    visible,
-    setup,
-    maxCharWidth,
-  }: {
-    label?: string | Binding<any, any, string>;
-    hpack: "start" | "end";
-    visible?: boolean | Binding<any, any, boolean>;
-    setup?: (self) => void;
-    maxCharWidth: number;
-  }) =>
-    Widget.Label({
-      css: primaryColor.as((color) =>
-        css.ColorRGBA({
-          red: color.red, //textColor(color.red),
-          green: color.green, //textColor(color.green),
-          blue: color.blue, //textColor(color.blue),
-          alpha: 1,
-        })
-      ),
-      visible: visible ?? false,
-      hpack: hpack,
-      maxWidthChars: maxCharWidth,
-      truncate: "end",
-      label: label ?? "",
-      setup: setup ?? (() => {}),
-    });
-
-  const song = () =>
-    text({
-      hpack: "start",
-      label: player.bind("track_title"),
-      maxCharWidth: titleMaxCharWidth,
-    });
-
-  const artist = () =>
-    text({
-      hpack: "start",
-      label: player.bind("track_artists").as((artists) => artists.join(", ")),
-      maxCharWidth: artistMaxCharWidth,
-    });
-
-  const progress = () =>
-    text({
-      hpack: "end",
-      visible: player.bind("length").as((length) => length > 0),
-      maxCharWidth: 20,
-      setup: (self) => {
-        function update() {
-          self.label = `${lengthStr(player.position)} / ${lengthStr(
-            player.length
-          )}`;
-        }
-        self.hook(player, update);
-        self.hook(player, update, "position");
-        self.poll(1000, update);
-      },
-    });
-
-  return coverContainer({
-    left: pillContainer({
-      children: [
-        song(),
-        Widget.Box({ spacing: 8, children: [artist(), progress()] }),
-      ],
-      hpack: "start",
-      vpack: "center",
-      vertical: true,
-      gradientDegrees: 90,
+      transition: playerTransition,
+      transitionDuration: animationDuration,
     }),
   });
+  return _player;
 };

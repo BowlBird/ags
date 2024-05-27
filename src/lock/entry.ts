@@ -13,7 +13,7 @@ import * as splash from "src/splash.json";
 import { subheader } from "./widgets/subheader";
 import { separator } from "./widgets/separator";
 import { MprisPlayer } from "types/types/service/mpris";
-import { playerWidget } from "src/widgets/player";
+import { MprisWidget, playerWidget } from "src/widgets/player";
 
 // definition of lock screen
 export const entry = async ({
@@ -316,29 +316,23 @@ export const entry = async ({
       }),
     });
 
-  const player = () =>
-    Widget.Box({
-      css: css.padding({ top: 1 }),
-      children: mprisService.bind("players").as((p) =>
-        p.map((it) =>
-          playerWidget({
-            player: it,
-            width: width + 1,
-            height: 2.5,
-            titleMaxCharWidth: 20,
-            artistMaxCharWidth: 13,
-          })
-        )
-      ),
-      spacing: 8,
-      vertical: true,
-    });
+  const _player = await MprisWidget({
+    width: width + 1,
+    height: 5,
+    titleMaxCharWidth: 15,
+    artistMaxCharWidth: 15,
+    animationDuration: animationDuration,
+    playerDuration: 10000,
+    playerTransition: "crossfade",
+    widgetTransition: "slide_up",
+    playerStyle: "",
+  });
 
   // === CONSTRUCTION ===
 
   const _widgets = widgetBox({
     widgets: [
-      [player()],
+      [_player],
       //if you have the monitor to use the lock screen, it has a brightness.
       [_batteryRevealer, _audioRevealer, await brightness(), _weatherRevealer],
     ],

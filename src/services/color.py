@@ -5,7 +5,8 @@ import json
 # grab from path provided as an argument
 color_thief = ColorThief(sys.argv[1])
 # return result of generating palette as parsable json
-data = list(map(lambda color: {"red": color[0], "green": color[1], "blue": color[2]},color_thief.get_palette(color_count=2, quality=10)))
+palette = color_thief.get_palette(color_count=2, quality=10)
+data = [{"red": color[0], "green": color[1], "blue": color[2]} for color in palette] 
 
 # we expect 3 results, lets name them.
 print(json.dumps({

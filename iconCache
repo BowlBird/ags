@@ -22,3 +22,7 @@ Viewnior=viewnior
 krita=krita
 Xdg-desktop-portal-gtk=applications-system-symbolic
 vesktop=vesktop
+discord=discord
+nm-connection-editor=preferences-system-network
+rhythmbox=org.gnome.Rhythmbox3
+com.obsproject.Studio=com.obsproject.Studio

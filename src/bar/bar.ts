@@ -1,28 +1,30 @@
 import { clockWidget } from "src/widgets/clock";
-import { System } from "./system";
-import { SysTray } from "./tray";
-import { Workspaces } from "./workspaces";
 import { css } from "src/services/css";
 import { pillsContainer } from "./widgets/pill";
 import { weatherFetched, weatherWidget } from "src/widgets/weather";
 import { batteryWidget } from "src/widgets/battery";
 import { audioWidget } from "src/widgets/audio";
 import { Binding } from "types/types/service";
-import { dateWidget, shortDateWidget } from "src/widgets/date";
+import { dateWidget } from "src/widgets/date";
 import { brightnessWidget } from "src/widgets/brightness";
+import { trayWidget } from "./widgets/tray";
+import { MprisWidget, playerWidget } from "src/widgets/player";
+import { transitionContainer } from "src/widgets/transitionContainer";
+import { workspacesWidget } from "./widgets/workspaces";
 
 export const bar = async ({
   monitor,
   windowName,
   animationDuration,
+  height,
 }: {
   monitor: number;
   windowName: string;
   animationDuration: number;
+  height: number;
 }) => {
   const batteryService = await Service.import("battery");
   const audioService = await Service.import("audio");
-  const mprisService = await Service.import("mpris");
 
   const widgetRevealer = ({
     reveal,
@@ -49,12 +51,13 @@ export const bar = async ({
   });
 
   const _clockRevealer = Widget.Stack({
+    css: css.padding({ right: 0.5 }),
     children: {
       clock: _clock,
       date: _date,
     },
     shown: "clock",
-    transition: "slide_up_down",
+    transition: "slide_left_right",
     homogeneous: false,
     interpolate_size: true,
     transition_duration: animationDuration,
@@ -137,47 +140,71 @@ export const bar = async ({
     child: await audio(),
   });
 
-  const brightness = async () =>
-    Widget.Box({
-      css: "",
-      child: await brightnessWidget({
-        overlayStyle: "",
-        indicatorStyle:
-          iconStyle +
-          css.ColorRGBA({ red: 250, green: 189, blue: 47, alpha: 1 }),
-        iconStyle:
-          css.fontSize({ size: 1 }) +
-          css.ColorRGBA({ red: 250, green: 189, blue: 47, alpha: 1 }),
-        startAt: 0.25,
-        rounded: true,
-      }),
-    });
+  const _brightness = Widget.Box({
+    css: "",
+    child: await brightnessWidget({
+      overlayStyle: "",
+      indicatorStyle:
+        iconStyle + css.ColorRGBA({ red: 250, green: 189, blue: 47, alpha: 1 }),
+      iconStyle:
+        css.fontSize({ size: 1 }) +
+        css.ColorRGBA({ red: 250, green: 189, blue: 47, alpha: 1 }),
+      startAt: 0.25,
+      rounded: true,
+    }),
+  });
 
-  const _bar = pillsContainer({
+  const _tray = Widget.Box({
+    css:
+      css.backgroundColorGTK({ color: "@theme_bg_color" }) +
+      // css.backgroundColorRGBA({ red: 51, green: 50, blue: 67, alpha: 0.7 }) +
+      css.padding({ left: 0.5, right: 0.5 }) +
+      css.borderRadiusAll({ radius: height / 2 }),
+    child: await trayWidget({
+      transition: "slide_right",
+      transitionDuration: animationDuration,
+      spacing: 10,
+      size: 20,
+    }),
+  });
+
+  const _workspaces = await workspacesWidget({
+    animationDuration: animationDuration,
+    spacing: 10,
+    iconSize: 20,
+    height: height,
+  });
+
+  const _player = await MprisWidget({
+    width: 20,
+    height: height,
+    titleMaxCharWidth: 15,
+    artistMaxCharWidth: 15,
+    animationDuration: animationDuration,
+    playerDuration: 10000,
+    playerTransition: "crossfade",
+    widgetTransition: "slide_right",
+    playerStyle: css.margin({ left: 0.35, right: 0.35 }),
+  });
+
+  const _rightBar = pillsContainer({
     containerSpacing: 10,
     widgetSpacing: 10,
-    containerStyle: css.margin({ top: 0.7, left: 0.7, right: 0.7 }),
-    pillStyle:
-      css.paddingAll({ padding: 0.25 }) +
-      css.borderAll({
-        width: 0.08,
-        type: "solid",
-        red: 175,
-        green: 175,
-        blue: 175,
-        alpha: 1,
-      }) +
-      css.borderRadius({ radius: 1 }) +
+    containerStyle:
+      "border: @theme_bg_color solid 1px;" +
+      css.minHeight({ height: height }) +
+      css.borderRadiusAll({ radius: height / 2 }) +
       css.backgroundColorRGBA({
         red: 30,
         green: 30,
         blue: 30,
         alpha: 0.7,
       }),
+    pillStyle: "",
     children: [
-      [],
+      [_tray],
       [
-        await brightness(),
+        _brightness,
         _audioRevealer,
         _batteryRevealer,
         _weatherRevealer,
@@ -186,20 +213,36 @@ export const bar = async ({
     ],
   });
 
+  const _leftBar = pillsContainer({
+    containerSpacing: 10,
+    widgetSpacing: 10,
+    containerStyle:
+      "border: @theme_bg_color solid 1px;" +
+      css.minHeight({ height: height }) +
+      css.borderRadiusAll({ radius: height / 2 }) +
+      css.backgroundColorRGBA({
+        red: 30,
+        green: 30,
+        blue: 30,
+        alpha: 0.7,
+      }),
+    pillStyle: "",
+    children: [[_workspaces]],
+  });
+
+  const _bar = Widget.Box({
+    hpack: "center",
+    css: css.margin({ top: 0.7, left: 0.7, right: 0.7 }),
+    spacing: 5,
+    children: [_leftBar, _player, _rightBar],
+  });
+
   return Widget.Window({
     name: windowName,
     class_name: "bar",
     monitor,
     anchor: ["top", "left", "right"],
     exclusivity: "exclusive",
-    child: Widget.CenterBox({
-      start_widget: Widget.Box({
-        children: [Workspaces()],
-      }),
-      end_widget: Widget.Box({
-        hpack: "end",
-        children: [SysTray(), _bar],
-      }),
-    }),
+    child: _bar,
   });
 };

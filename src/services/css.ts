@@ -41,6 +41,8 @@ export const css = {
     `background: linear-gradient(${degrees}deg, rgba(${fromRed}, ${fromGreen}, ${fromBlue}, ${fromAlpha}) ${transitionPoint}%, rgba(${toRed}, ${toGreen}, ${toBlue}, ${toAlpha}));`,
   backgroundImage: ({ image }: { image: string }) =>
     `background-image: url('${image}');`,
+  backgroundRepeat: ({ repeat }: { repeat: string }) =>
+    `background-repeat: ${repeat};`,
   backgroundSize: ({ size }: { size: "auto" | "contain" | "cover" }) =>
     `background-size: ${size};`,
   backgroundPosition: ({
@@ -116,8 +118,22 @@ export const css = {
     `font-style: ${style};`,
   minWidth: ({ width }: { width: number }) => `min-width: ${width}rem;`,
   minHeight: ({ height }: { height: number }) => `min-height: ${height}rem;`,
-  borderRadius: ({ radius }: { radius: number }) =>
+  borderRadiusAll: ({ radius }: { radius: number }) =>
     `border-radius: ${radius}rem;`,
+  borderRadius: ({
+    topLeft,
+    topRight,
+    bottomLeft,
+    bottomRight,
+  }: {
+    topLeft?: number;
+    topRight?: number;
+    bottomLeft?: number;
+    bottomRight?: number;
+  }) =>
+    `border-radius: ${topLeft ? topLeft : 0}rem ${topRight ? topRight : 0}rem ${
+      bottomRight ? bottomRight : 0
+    }rem ${bottomLeft ? bottomLeft : 0}rem;`,
   borderAll: ({
     width,
     type,

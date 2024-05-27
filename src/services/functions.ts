@@ -5,7 +5,7 @@ import Window from "types/types/widgets/window";
 var HOME_DIR = Utils.exec('bash -c "echo $HOME"');
 var ICON_CACHE = "iconCache";
 
-export function IconFromClass(initialClass) {
+export function IconFromClass(initialClass): Promise<string> {
   return new Promise(function (resolve, _) {
     //get from cache
     try {
